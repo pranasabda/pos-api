@@ -22,6 +22,7 @@ func ConnectDB() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Println("Peringatan: File .env tidak ditemukan")
 	}
+	viper.AutomaticEnv() // TAMBAHKAN INI: Agar Viper bisa baca environment Zeabur
 	viper.ReadInConfig()
 
 	// Konfigurasi Logger GORM agar Query SQL muncul di terminal
