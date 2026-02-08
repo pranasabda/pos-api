@@ -59,7 +59,17 @@ func ConnectDB() {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	// Sinkronisasi tabel otomatis
-	db.AutoMigrate(&models.Category{}, &models.Product{})
+	db.AutoMigrate(
+		&models.Category{},
+		&models.Product{},
+		&models.Transaction{},
+		&models.TransactionDetail{},
+	)
+
+	// Error log jika database, table tidak ada
+	if err != nil {
+		log.Println("Migrasi Gagal: ", err)
+	}
 
 	DB = db
 	log.Println("Database terkoneksi dan migrasi selesai")

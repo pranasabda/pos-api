@@ -11,6 +11,7 @@ type ProductService interface {
 	Store(product models.Product) (models.Product, error)
 	Update(id int, product models.Product) (models.Product, error) // WAJIB ADA DISINI
 	Delete(id int) error                                           // WAJIB ADA DISINI
+	Search(query string) ([]models.Product, error)                 // Search by Query
 }
 
 type productService struct {
@@ -39,4 +40,9 @@ func (s *productService) Update(id int, product models.Product) (models.Product,
 
 func (s *productService) Delete(id int) error {
 	return s.repo.Delete(id)
+}
+
+// fungsi search by query
+func (s *productService) Search(name string) ([]models.Product, error) {
+	return s.repo.Search(name)
 }

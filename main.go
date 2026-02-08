@@ -25,6 +25,14 @@ func main() {
 	prodService := services.NewProductService(prodRepo)
 	prodHandler := handlers.NewProductHandler(prodService)
 
+	// Dependency Injection - Transaction & Report
+	transRepo := repositories.NewTransactionRepository(database.DB)
+	transService := services.NewTransactionService(transRepo, prodRepo)
+	transHandler := handlers.NewTransactionHandler(transService)
+
+	reportService := services.NewReportService(transRepo)
+	reportHandler := handlers.NewReportHandler(reportService)
+
 	// --- ROUTING ---
 
 	// Routes Category
@@ -79,11 +87,40 @@ func main() {
 		}
 	})
 
+	// Transactions
+	http.HandleFunc("/api/transactions", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			transHandler.CreateTransaction(w, r)
+		}
+	})
+
+	// --- TRANSACTIONS & CHECKOUT ---
+	// endpoint /api/checkout sesuai catatan, fungsi mirip dengan api/transactions
+	http.HandleFunc("/api/checkout", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			transHandler.CreateTransaction(w, r)
+		} else {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
+	})
+
+	// Query dengan endpoint product
+	// http.HandleFunc("/api/products/product", prodHandler.SearchProduct)
+
+	// Search
+	http.HandleFunc("/api/products/search", prodHandler.SearchProduct)
+
+	// Report Summary Hari Ini (Task 2b)
+	http.HandleFunc("/api/report/hari-ini", reportHandler.GetSalesReport)
+	// Report Summary Custom Range (Task 2c - Optional Challenge)
+	http.HandleFunc("/api/report", reportHandler.GetSalesReport)
+
 	port := viper.GetString("SERVER_PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	fmt.Println("Server POS berjalan di http://localhost:8080")
+	// fmt.Println("Server POS berjalan di http://localhost:8080")
+	fmt.Printf("Server POS berjalan di http://localhost:%s\n", port) //update agar port dinamis
 	http.ListenAndServe(":"+port, nil)
 }
