@@ -12,6 +12,7 @@ type ProductRepository interface {
 	Create(product models.Product) (models.Product, error)
 	Update(id int, product models.Product) (models.Product, error) // Baru
 	Delete(id int) error                                           // Baru
+	Search(query string) ([]models.Product, error)                 // Search by Query
 }
 
 type productRepository struct {
@@ -56,4 +57,12 @@ func (r *productRepository) Update(id int, product models.Product) (models.Produ
 // Fungsi Delete Produk
 func (r *productRepository) Delete(id int) error {
 	return r.db.Delete(&models.Product{}, id).Error
+}
+
+// Fungsi Search by Query
+func (r *productRepository) Search(query string) ([]models.Product, error) {
+	var products []models.Product
+	// Mencari berdasarkan nama yang mirip (ILIKE untuk PostgreSQL)
+	err := r.db.Where("name ILIKE ?", "%"+query+"%").Preload("Category").Find(&products).Error // Preload Category agar data kategori muncul saat produk dicari
+	return products, err
 }
